@@ -5,7 +5,7 @@ import os
 
 
 def check_face(frame):
-    global face_match
+    global recognized_person
     global data
 
     for person_name, photos in data.items():
@@ -15,19 +15,19 @@ def check_face(frame):
                 reference_image = cv2.cvtColor(reference_image, cv2.COLOR_BGR2RGB)
 
                 if DeepFace.verify(frame, reference_image.copy())['verified']:
-                    face_match = True
+                    recognized_person = person_name
                     return  # Sale del bucle cuando encuentra una coincidencia
             except ValueError:
                 pass
 
-    face_match = False
+    recognized_person = "Desconocido"
 
 # load Haarcascade model for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 
 counter = 0
-face_match = False
+recognized_person = 'Desconocido'
 
 # load photos route for each person
 data = {}
@@ -70,10 +70,11 @@ while True:
             except ValueError:
                 pass
         counter += 1
-        if face_match:
-            cv2.putText(frame, "Face Match!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        if recognized_person != 'Desconocido':
+            cv2.putText(
+                frame, f"Persona: {recognized_person}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
         else:
-            cv2.putText(frame, "No Match!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(frame, "Desconocido", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
 
         cv2.imshow('video', frame)
 
