@@ -1,18 +1,26 @@
 import threading
 import cv2
 from deepface import DeepFace
+import os
 
 
 def check_face(frame):
     global face_match
-    global reference_image
-    try:
-        if DeepFace.verify(frame, reference_image.copy())['verified']:
-            face_match = True
-        else:
-            face_match = False
-    except ValueError:
-        face_match = False
+    global data
+
+    for person_name, photos in data.items():
+        for photo_path in photos:
+            try:
+                reference_image = cv2.imread(photo_path)
+                reference_image = cv2.cvtColor(reference_image, cv2.COLOR_BGR2RGB)
+
+                if DeepFace.verify(frame, reference_image.copy())['verified']:
+                    face_match = True
+                    return  # Sale del bucle cuando encuentra una coincidencia
+            except ValueError:
+                pass
+
+    face_match = False
 
 # load Haarcascade model for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -21,8 +29,21 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_fronta
 counter = 0
 face_match = False
 
-reference_image = cv2.imread('photos/sandra.jpg')
-reference_image = cv2.cvtColor(reference_image, cv2.COLOR_BGR2RGB)
+# load photos route for each person
+data = {}
+root_dir = 'data'
+
+for person_name in os.listdir(root_dir):
+    person_dir = os.path.join(root_dir, person_name)
+
+    if os.path.isdir(person_dir):
+        photos = [os.path.join(person_dir, photo) for photo in os.listdir(person_dir) if photo.endswith('.jpg')]
+        data[person_name] = photos
+
+
+
+#reference_image = cv2.imread('photos/sandra.jpg')
+#reference_image = cv2.cvtColor(reference_image, cv2.COLOR_BGR2RGB)
 
 cap = cv2.VideoCapture(0)
 
