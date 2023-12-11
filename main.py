@@ -14,7 +14,7 @@ def check_face(frame):
                 reference_image = cv2.imread(photo_path)
                 reference_image = cv2.cvtColor(reference_image, cv2.COLOR_BGR2RGB)
 
-                result = DeepFace.verify(frame, reference_image.copy(), distance_metric = "euclidean_l2")
+                result = DeepFace.verify(frame, reference_image.copy(), distance_metric = "cosine")
 
                 if result['verified']:
                     recognized_person = person_name
