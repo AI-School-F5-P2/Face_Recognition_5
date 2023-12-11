@@ -20,20 +20,25 @@ def check_face(frame):
                 reference_image = cv2.imread(photo_path)
                 reference_image = cv2.cvtColor(reference_image, cv2.COLOR_BGR2RGB)
 
-                if DeepFace.verify(frame, reference_image.copy())['verified']:
+                result = DeepFace.verify(frame, reference_image.copy(), distance_metric = "cosine")
+
+                if result['verified']:
                     recognized_person = person_name
-                    return  # Sale del bucle cuando encuentra una coincidencia
+                    confidence = 1 - result['distance']
+                    return recognized_person, confidence # Sale del bucle cuando encuentra una coincidencia
             except ValueError:
                 pass
 
-        recognized_person = "Desconocido"
+    recognized_person = "Desconocido"
+    confidence = 0
+    return recognized_person, confidence
 
 # load Haarcascade model for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-
 counter = 0
-recognized_person = "Desconocido"
+
+recognized_person = 'Desconocido'
+
 # load photos route for each person
 data = {}
 root_dir = 'data'
@@ -85,18 +90,66 @@ def update_camera():
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
         # draw a rectangle around the faces
         for (x, y, w, h) in faces:
-            frame = cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 3)
-            if counter % 60 == 0:
+            frame = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
+            if counter % 30 == 0:
                 try:
+                    recognized_person, confidence = check_face(frame[y:y + h, x:x + w].copy())
                     threading.Thread(target=check_face, args=(frame[y:y+h, x:x+w].copy(),)).start()
                 except ValueError:
                     pass
             counter += 1
 
             if recognized_person != 'Desconocido':
-                cv2.putText(frame, f"Persona: {recognized_person}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (72, 131, 72), 3)
+                cv2.putText(
+                    frame,
+                    f"{recognized_person.upper()}",
+                    (x, y + h + 40),  # Colocar en la parte inferior del bounding box
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.9,
+                    (255, 255, 255),  # Color del texto
+                    2
+                )
+
+                cv2.putText(
+                    frame,
+                    "ACCESO PERMITIDO",
+                    (x, y + h + 75),  # Colocar debajo del nombre
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.9,
+                    (72, 131, 72),  # Color del texto
+                    2
+                )
+
+                cv2.putText(
+                    frame,
+                    f"Seguridad: {confidence:.2%}",
+                    (x, y + h + 110),  # Colocar al lado del nombre
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.9,
+                    (72, 131, 72),  # Color del texto
+                    2
+                )
             else:
-                cv2.putText(frame, "Desconocido", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+                cv2.putText(
+                    frame,
+                    f"{recognized_person.upper()}",
+                    (x, y + h + 40),  # Colocar en la parte inferior del bounding box
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.9,
+                    (0, 0, 255),  # Color del texto
+                    2
+                )
+
+                cv2.putText(
+                    frame,
+                    "ACCESO DENEGADO",
+                    (x, y + h + 75),  # Colocar debajo del nombre
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.9,
+                    (0, 0, 255),  # Color del texto
+                    2
+                )
 
                 # Convierte la imagen para mostrar en customtkinter
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
