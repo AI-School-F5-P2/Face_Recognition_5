@@ -31,6 +31,8 @@ def check_face(frame):
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 counter = 0
 
+# Directorio base para guardar las fotos
+output_base_dir = "data"
 recognized_person = 'Desconocido'
 
 # load photos route for each person
@@ -62,6 +64,7 @@ while True:
         faces = face_cascade.detectMultiScale(gray, 1.3, 5)
         # draw a rectangle around the faces
         for (x, y, w, h) in faces:
+            # Create a rectangle around the faces
             frame = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
             if counter % 30 == 0:
                 try:
@@ -72,54 +75,67 @@ while True:
             counter += 1
 
             if recognized_person != 'Desconocido':
+                # save the ROI
+                roi = frame[y:y + h, x:x + w]
+                # create a file with the ROI
+                if counter <= 30:
+                    output_dir = os.path.join(output_base_dir, recognized_person)
+                    # Verificar y crear el directorio si no existe
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+
+                    output_path = os.path.join(output_dir, f'{recognized_person.upper()}_roi_{counter}.jpg')
+                    print(f"Saving ROI in {output_path}")
+                    cv2.imwrite(output_path, roi)
+                # draw a rectangle around the faces with border green
                 frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (72, 131, 72), 3)
                 cv2.putText(
                     frame,
                     f"{recognized_person.upper()}",
-                    (x, y + h + 40),  # Colocar en la parte inferior del bounding box
+                    (x, y + h + 40),  # display name below the bounding box
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.9,
-                    (255, 255, 255),  # Color del texto
+                    (255, 255, 255),  # text color
                     2
                 )
 
                 cv2.putText(
                     frame,
                     "ACCESO PERMITIDO",
-                    (x, y + h + 75),  # Colocar debajo del nombre
+                    (x, y + h + 75),  # display below the name
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.9,
-                    (72, 131, 72),  # Color del texto
+                    (72, 131, 72),  # text color
                     2
                 )
 
                 cv2.putText(
                     frame,
                     f"Seguridad: {confidence:.2%}",
-                    (x, y + h + 110),  # Colocar al lado del nombre
+                    (x, y + h + 110),  # display below Access Allowed
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.9,
-                    (72, 131, 72),  # Color del texto
+                    (72, 131, 72),  # text color
                     2
                 )
             else:
                 cv2.putText(
                     frame,
                     f"{recognized_person.upper()}",
-                    (x, y + h + 40),  # Colocar en la parte inferior del bounding box
+                    (x, y + h + 40),  # display 'Desconocido' below the bounding box
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.9,
-                    (0, 0, 255),  # Color del texto
+                    (0, 0, 255),  # text color
                     2
                 )
 
                 cv2.putText(
                     frame,
                     "ACCESO DENEGADO",
-                    (x, y + h + 75),  # Colocar debajo del nombre
+                    (x, y + h + 75),  # Display below 'Desconocido'
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.9,
-                    (0, 0, 255),  # Color del texto
+                    (0, 0, 255),  # text color
                     2
                 )
 
