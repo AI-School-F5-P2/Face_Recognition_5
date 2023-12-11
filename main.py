@@ -14,19 +14,23 @@ def check_face(frame):
                 reference_image = cv2.imread(photo_path)
                 reference_image = cv2.cvtColor(reference_image, cv2.COLOR_BGR2RGB)
 
-                if DeepFace.verify(frame, reference_image.copy())['verified']:
+                result = DeepFace.verify(frame, reference_image.copy(), distance_metric = "euclidean_l2")
+
+                if result['verified']:
                     recognized_person = person_name
-                    return  # Sale del bucle cuando encuentra una coincidencia
+                    confidence = 1 - result['distance']
+                    return recognized_person, confidence # Sale del bucle cuando encuentra una coincidencia
             except ValueError:
                 pass
 
     recognized_person = "Desconocido"
+    confidence = 0
+    return recognized_person, confidence
 
 # load Haarcascade model for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-
 counter = 0
+
 recognized_person = 'Desconocido'
 
 # load photos route for each person
@@ -61,6 +65,7 @@ while True:
             frame = cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 3)
             if counter % 30 == 0:
                 try:
+                    recognized_person, confidence = check_face(frame[y:y + h, x:x + w].copy())
                     threading.Thread(target=check_face, args=(frame[y:y+h, x:x+w].copy(),)).start()
                 except ValueError:
                     pass
@@ -68,7 +73,7 @@ while True:
 
             if recognized_person != 'Desconocido':
                 cv2.putText(
-                    frame, f"ACCESO PERMITIDO - {recognized_person}", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+                    frame, f"ACCESO PERMITIDO - {recognized_person} - ({confidence:.2%})", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (72, 131, 72), 2)
             else:
                 cv2.putText(frame, "ACCESO DENEGADO - Desconocido", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
 
