@@ -47,7 +47,7 @@ def count_photos(dir, extension):
 
 
 # Max number of photos to take
-max_photos = 31
+max_photos = 50
 
 
 # load Haarcascade model for face detection
@@ -105,11 +105,12 @@ while True:
             counter += 1
 
             if recognized_person != 'Desconocido':
+                # Count the number of photos saved
                 saved_photos = count_photos(os.path.join(output_base_dir, recognized_person), '.jpg')
                 # save the ROI
                 roi = frame[y:y + h, x:x + w]
                 # create a file with the ROI
-                if saved_photos < max_photos:
+                if saved_photos < max_photos and confidence > 0.8:
                     timestamp = int(time.time())
                     unique_identifier = f"{recognized_person.upper()}_{timestamp}"
                     output_dir = os.path.join(output_base_dir, recognized_person)
