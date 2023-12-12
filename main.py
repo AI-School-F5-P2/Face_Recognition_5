@@ -2,6 +2,7 @@ import threading
 import cv2
 from deepface import DeepFace
 import os
+import time
 
 
 def check_face(frame):
@@ -26,6 +27,10 @@ def check_face(frame):
     recognized_person = "Desconocido"
     confidence = 0
     return recognized_person, confidence
+
+# Max number of photos to take
+max_photos = 30
+saved_photos = 0
 
 # load Haarcascade model for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -78,15 +83,18 @@ while True:
                 # save the ROI
                 roi = frame[y:y + h, x:x + w]
                 # create a file with the ROI
-                if counter <= 30:
+                if saved_photos < max_photos:
+                    timestamp = int(time.time())
+                    unique_identifier = f"{recognized_person.upper()}_{timestamp}"
                     output_dir = os.path.join(output_base_dir, recognized_person)
                     # Verificar y crear el directorio si no existe
                     if not os.path.exists(output_dir):
                         os.makedirs(output_dir)
 
-                    output_path = os.path.join(output_dir, f'{recognized_person.upper()}_roi_{counter}.jpg')
-                    print(f"Saving ROI in {output_path}")
+                    output_path = os.path.join(output_dir, f'{unique_identifier}_roi_{saved_photos}.jpg')
                     cv2.imwrite(output_path, roi)
+                    saved_photos += 1
+
                 # draw a rectangle around the faces with border green
                 frame = cv2.rectangle(frame, (x, y), (x + w, y + h), (72, 131, 72), 3)
                 cv2.putText(
@@ -115,7 +123,7 @@ while True:
                     (x, y + h + 110),  # display below Access Allowed
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.9,
-                    (72, 131, 72),  # text color
+                    (255, 255, 255),  # text color
                     2
                 )
             else:
