@@ -20,7 +20,7 @@ def check_face(frame):
                 if result['verified']:
                     recognized_person = person_name
                     confidence = 1 - result['distance']
-                    return recognized_person, confidence # Sale del bucle cuando encuentra una coincidencia
+                    return recognized_person, confidence # Exit the function when a face is recognized
             except ValueError:
                 pass
 
@@ -28,12 +28,32 @@ def check_face(frame):
     confidence = 0
     return recognized_person, confidence
 
+def count_photos(dir, extension):
+    try:
+        # list all files in the directory
+        files = os.listdir(dir)
+
+        # Filter the files with the extension specified
+        files_with_ext = [file for file in files if file.endswith(extension)]
+
+        # Count the number of files with the extension specified
+        total_files = len(files_with_ext)
+
+        return total_files
+
+    except Exception as e:
+        print(f"Error al contar archivos: {str(e)}")
+        return None
+
+
 # Max number of photos to take
-max_photos = 30
-saved_photos = 0
+max_photos = 31
+
 
 # load Haarcascade model for face detection
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
+eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_eye.xml')
+
 counter = 0
 
 # Directorio base para guardar las fotos
@@ -66,11 +86,16 @@ while True:
         # convert to gray scale for face detection
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # detect faces with the model Haarcascade
-        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+        try:
+            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.3, minNeighbors = 5, minSize=(30, 30))
+        except Exception as e:
+            print(f"Error in face detection: {e}")
         # draw a rectangle around the faces
         for (x, y, w, h) in faces:
             # Create a rectangle around the faces
             frame = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
+
+            # Check if the face is recognized
             if counter % 30 == 0:
                 try:
                     recognized_person, confidence = check_face(frame[y:y + h, x:x + w].copy())
@@ -80,6 +105,7 @@ while True:
             counter += 1
 
             if recognized_person != 'Desconocido':
+                saved_photos = count_photos(os.path.join(output_base_dir, recognized_person), '.jpg')
                 # save the ROI
                 roi = frame[y:y + h, x:x + w]
                 # create a file with the ROI
@@ -87,7 +113,7 @@ while True:
                     timestamp = int(time.time())
                     unique_identifier = f"{recognized_person.upper()}_{timestamp}"
                     output_dir = os.path.join(output_base_dir, recognized_person)
-                    # Verificar y crear el directorio si no existe
+                    # Verify if the directory exists and create it if not
                     if not os.path.exists(output_dir):
                         os.makedirs(output_dir)
 
