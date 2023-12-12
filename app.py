@@ -8,6 +8,13 @@ import tkinter as tk
 from Save_data.Save_dt import ft_save_data
 from tkinter import PhotoImage
 
+recognized_person = 'Desconocido'
+# load Haarcascade model for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+counter = 0
+data = {}
+root_dir = 'data'
+confidence = 0
 
 
 def check_face(frame):
@@ -33,15 +40,9 @@ def check_face(frame):
     confidence = 0
     return recognized_person, confidence
 
-# load Haarcascade model for face detection
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-counter = 0
 
-recognized_person = 'Desconocido'
 
 # load photos route for each person
-data = {}
-root_dir = 'data'
 
 for person_name in os.listdir(root_dir):
     person_dir = os.path.join(root_dir, person_name)
@@ -58,7 +59,7 @@ cap = cv2.VideoCapture(0)
 # Configurar la interfaz gráfica
 app = customtkinter.CTk()
 app.title("Face Recognition")
-app.geometry("680x600")
+app.geometry("680x650")
 app.grid_columnconfigure((0), weight=1)
 
 
@@ -82,6 +83,8 @@ button1.grid(row=0, column=0, padx=20, pady=20, sticky="ew")
 
 def update_camera():
     global counter
+    global recognized_person
+    global confidence
     ret, frame = cap.read()
     if ret:
         # convert to gray scale for face detection
@@ -91,7 +94,7 @@ def update_camera():
         # draw a rectangle around the faces
         for (x, y, w, h) in faces:
             frame = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
-            if counter % 30 == 0:
+            if counter % 60 == 0:
                 try:
                     recognized_person, confidence = check_face(frame[y:y + h, x:x + w].copy())
                     threading.Thread(target=check_face, args=(frame[y:y+h, x:x+w].copy(),)).start()
@@ -120,7 +123,7 @@ def update_camera():
                     (72, 131, 72),  # Color del texto
                     2
                 )
-
+                
                 cv2.putText(
                     frame,
                     f"Seguridad: {confidence:.2%}",
@@ -130,6 +133,7 @@ def update_camera():
                     (72, 131, 72),  # Color del texto
                     2
                 )
+            
             else:
                 cv2.putText(
                     frame,
