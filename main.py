@@ -104,7 +104,7 @@ while True:
                     pass
             counter += 1
 
-            if recognized_person != 'Desconocido':
+            if recognized_person != 'Desconocido' and confidence > 0.8:
                 # Count the number of photos saved
                 saved_photos = count_photos(os.path.join(output_base_dir, recognized_person), '.jpg')
                 # save the ROI
