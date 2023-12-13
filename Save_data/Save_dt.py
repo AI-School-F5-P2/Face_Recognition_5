@@ -2,6 +2,7 @@ import cv2
 from PIL import Image, ImageTk
 import os
 import customtkinter as ctk
+from Save_data.Save_json import main_json
 
 # Variable global para la referencia persistente a la imagen
 imagen_tk = None
@@ -50,7 +51,11 @@ def ft_save_data(cap, app):
         # Cambiar el nombre de la carpeta temporal al nombre de la imagen
         new_folder_name = os.path.join("./data", photo_name)
         os.rename(temp_folder, new_folder_name)
-
+        if new_folder_name:
+            try:
+                main_json(photo_name, photo_name)
+            except Exception as e:
+                print(e)
        
 
         # Cerrar la ventana después de guardar la foto
