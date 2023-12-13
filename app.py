@@ -39,7 +39,7 @@ camera_frame = customtkinter.CTkFrame(app)
 camera_frame.grid(row=2, column=0, padx=20, pady=0)
 
 # Etiqueta para mostrar la cámara
-camera_label = customtkinter.CTkLabel(camera_frame)
+camera_label = customtkinter.CTkLabel(camera_frame, text="")
 camera_label.pack()
 
 # Frame para los botones
