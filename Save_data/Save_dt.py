@@ -7,7 +7,6 @@ from Save_data.Save_json import main_json
 # Variable global para la referencia persistente a la imagen
 imagen_tk = None
 
-
 def ft_save_data(cap, app):
     _, frame = cap.read()
 
@@ -19,26 +18,22 @@ def ft_save_data(cap, app):
     image_path = os.path.join(temp_folder, "temp_capture.jpg")
     cv2.imwrite(image_path, frame)
 
-    # Crear una nueva ventana para mostrar la imagen capturada
-    save_data_window = ctk.CTkToplevel(app)
-    save_data_window.title("Guardar Foto")
-
     # Cargar la imagen capturada
     captured_image = Image.open(image_path)
     photo = ImageTk.PhotoImage(captured_image)
 
-    # Mostrar la imagen en la nueva ventana
-    image_label = ctk.CTkLabel(save_data_window, image=photo)
+    # Mostrar la imagen en la ventana principal
+    image_label = ctk.CTkLabel(app, image=photo, text="¡Foto capturada!", font=("Arial", 30))
     image_label.image = photo
-    image_label.pack()
+    image_label.grid(row=2, column=0, padx=20, pady=0)
 
     # Label para el nombre de la foto
-    name_label = ctk.CTkLabel(save_data_window, text="Ingresa nombre y apellido", width=600, height=50, font=("Arial", 20))
-    name_label.pack()
+    name_label = ctk.CTkLabel(app, text="Ingresa nombre y apellido", width=600, height=50, font=("Arial", 20, "bold"))
+    name_label.grid(row=3, column=0, padx=20, pady=10)
 
     # Entry para ingresar el nombre de la foto
-    name_entry = ctk.CTkEntry(save_data_window,width=600, height=50, font=("Arial", 20))
-    name_entry.pack()
+    name_entry = ctk.CTkEntry(app, width=600, height=50, font=("Arial", 20), placeholder_text="Alexis Venegas...")
+    name_entry.grid(row=4, column=0, padx=20, pady=10)
 
     def save_photo():
         # Obtener el nombre ingresado por el usuario
@@ -56,16 +51,13 @@ def ft_save_data(cap, app):
                 main_json(photo_name, photo_name)
             except Exception as e:
                 print(e)
-       
 
-        # Cerrar la ventana después de guardar la foto
-        save_data_window.destroy()
-        app.destroy()
-        # volver a la ventana principal
-        # llamar a la funcion principal en app.py
-
-        
+        # Después de guardar la foto, destruir los elementos relacionados
+        image_label.destroy()
+        name_label.destroy()
+        name_entry.destroy()
+        save_button.destroy()
 
     # Botón para guardar la foto
-    save_button = ctk.CTkButton(save_data_window, text="Guardar", command=save_photo, width=600, height=50, font=("Arial", 20))
-    save_button.pack()
+    save_button = ctk.CTkButton(app, text="Guardar", command=save_photo, width=600, height=50, font=("Arial", 20))
+    save_button.grid(row=5, column=0, padx=20, pady=20)

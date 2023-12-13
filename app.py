@@ -13,6 +13,8 @@ confidence = 0
 data = {}
 root_dir = 'data'
 
+
+
 # load Haarcascade model for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 counter = 0
@@ -31,7 +33,8 @@ cap = cv2.VideoCapture(0)
 # Configurar la interfaz gráfica
 app = customtkinter.CTk()
 app.title("Face Recognition")
-app.geometry("680x650")
+# app.geometry("680x650")
+app.geometry("680x810")
 app.grid_columnconfigure((0), weight=1)
 
 # Frame para la cámara
@@ -44,12 +47,12 @@ camera_label.pack()
 
 # Frame para los botones
 buttons_frame = customtkinter.CTkFrame(app)
-buttons_frame.grid(row=1, column=0, padx=20, pady=20)
+buttons_frame.grid(row=1, column=0, padx=20, pady=10)
 
 # Botón 1
 button1 = customtkinter.CTkButton(buttons_frame, text="Registrate", command=lambda: ft_save_data(cap, app),
                                    width=600, height=50, font=("Arial", 20))
-button1.grid(row=0, column=0, padx=20, pady=20, sticky="ew")
+button1.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
 
 def check_face(frame):
     global recognized_person
@@ -81,6 +84,7 @@ def update_camera():
         ret, frame = cap.read()
         if ret:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
             faces = face_cascade.detectMultiScale(gray, 1.3, 5)
 
             for (x, y, w, h) in faces:
