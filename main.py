@@ -52,7 +52,10 @@ max_photos = 50
 
 # load Haarcascade model for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_frontalface_default.xml')
+if face_cascade.empty(): raise Exception("your face_cascade is empty. are you sure, the path is correct ?")
+
 eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + './haarcascade_eye.xml')
+if eye_cascade.empty(): raise Exception("your eye_cascade is empty. are you sure, the path is correct ?")
 
 counter = 0
 
@@ -70,6 +73,7 @@ for person_name in os.listdir(root_dir):
     if os.path.isdir(person_dir):
         photos = [os.path.join(person_dir, photo) for photo in os.listdir(person_dir) if photo.endswith('.jpg')]
         data[person_name] = photos
+        print(f"Photos of {person_name}: {len(photos)}")
 
 cap = cv2.VideoCapture(0)
 
@@ -96,21 +100,22 @@ while True:
             frame = cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
 
             # Check if the face is recognized
-            if counter % 30 == 0:
+            if counter % 60 == 0:
                 try:
+                    threading.Thread(target=check_face, args=(frame[y:y + h, x:x + w].copy(),)).start()
                     recognized_person, confidence = check_face(frame[y:y + h, x:x + w].copy())
-                    threading.Thread(target=check_face, args=(frame[y:y+h, x:x+w].copy(),)).start()
+                    # threading.Thread(target=check_face, args=(frame[y:y+h, x:x+w].copy(),)).start()
                 except ValueError:
                     pass
             counter += 1
 
-            if recognized_person != 'Desconocido' and confidence > 0.8:
+            if recognized_person != 'Desconocido': #and confidence > 0.8:
                 # Count the number of photos saved
                 saved_photos = count_photos(os.path.join(output_base_dir, recognized_person), '.jpg')
                 # save the ROI
                 roi = frame[y:y + h, x:x + w]
                 # create a file with the ROI
-                if saved_photos < max_photos and confidence > 0.8:
+                if saved_photos < max_photos: #and confidence > 0.8:
                     timestamp = int(time.time())
                     unique_identifier = f"{recognized_person.upper()}_{timestamp}"
                     output_dir = os.path.join(output_base_dir, recognized_person)
