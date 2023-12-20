@@ -80,14 +80,14 @@ class FaceRecognition:
                
 
                 # creamos un hilo
-                self.hilo_face_locations = threading.Thread(target=face_recognition.face_locations, args=(rgb_small_frame,))
-                self.hilo_face_locations.start()
-                self.hilo_face_encodings = threading.Thread(target=face_recognition.face_encodings, args=(rgb_small_frame, self.face_locations,))
-                self.hilo_face_encodings.start()
-                self.hilo_face_locations.join()
-                self.hilo_face_encodings.join()
-                # self.face_locations = face_recognition.face_locations(rgb_small_frame)
-                # self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
+                # self.hilo_face_locations = threading.Thread(target=face_recognition.face_locations, args=(rgb_small_frame,))
+                # self.hilo_face_locations.start()
+                # self.hilo_face_encodings = threading.Thread(target=face_recognition.face_encodings, args=(rgb_small_frame, self.face_locations,))
+                # self.hilo_face_encodings.start()
+                # self.hilo_face_locations.join()
+                # self.hilo_face_encodings.join()
+                self.face_locations = face_recognition.face_locations(rgb_small_frame)
+                self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
 
                 self.face_names = []
                 for face_encoding in self.face_encodings:
