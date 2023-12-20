@@ -3,6 +3,7 @@ from PIL import Image, ImageTk
 import os
 import customtkinter as ctk
 from Save_data.Save_json import main_json
+import shutil
 
 # Variable global para la referencia persistente a la imagen
 imagen_tk = None
@@ -39,13 +40,18 @@ def ft_save_data(cap, app):
         # Obtener el nombre ingresado por el usuario
         photo_name = name_entry.get()
 
-        # Guardar la imagen con el nombre proporcionado en la carpeta temporal
-        save_path = os.path.join(temp_folder, f"{photo_name}.jpg")
-        captured_image.save(save_path)
+        # # Guardar la imagen con el nombre proporcionado en la carpeta temporal
+        save_path_temp = os.path.join(temp_folder, f"{photo_name}.jpg")
+        captured_image.save(save_path_temp)
+
+        # Copiar la imagen a la carpeta 'faces' con extensión .jpg
+        save_path_faces = os.path.join("faces", f"{photo_name}.jpg")
+        shutil.copy(save_path_temp, save_path_faces)
 
         # Cambiar el nombre de la carpeta temporal al nombre de la imagen
         new_folder_name = os.path.join("./data", photo_name)
         os.rename(temp_folder, new_folder_name)
+        
         if new_folder_name:
             try:
                 main_json(photo_name, photo_name)
