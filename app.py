@@ -83,10 +83,10 @@ class FaceRecognition:
         self.camera_label.pack()
 
         self.buttons_frame = customtkinter.CTkFrame(self.root)
-
         self.buttons_frame.grid(row=1, column=0, padx=20, pady=5)
 
         self.button1 = customtkinter.CTkButton(self.buttons_frame, text="Agregar Persona", command=self.capture_image, width=600, height=50, font=("Arial", 20))
+        self.button1.grid(row=0, column=0, padx=20, pady=5, sticky="ew")
 
         self.run_recognition_thread = threading.Thread(target=self.run_recognition)
         self.run_recognition_thread.daemon = True
@@ -98,12 +98,12 @@ class FaceRecognition:
 
         :return:
         """
+        for image in os.listdir('faces'):
+            face_image = face_recognition.load_image_file(f'faces/{image}')
+            face_encoding = face_recognition.face_encodings(face_image)[0]
 
-        self.buttons_frame.grid(row=1, column=0, padx=20, pady=10)
-
-        self.button1 = customtkinter.CTkButton(self.buttons_frame, text="Agregar Persona", command=self.capture_image, width=600, height=50, font=("Arial", 20))
-        self.known_face_encodings.append(face_encoding)
-        self.known_face_names.append(image)
+            self.known_face_encodings.append(face_encoding)
+            self.known_face_names.append(image)
 
         print(self.known_face_names)
 
