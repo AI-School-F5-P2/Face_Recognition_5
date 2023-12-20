@@ -49,7 +49,10 @@ class FaceRecognition:
 
         self.button1 = customtkinter.CTkButton(self.buttons_frame, text="Agregar Persona", command=self.capture_image, width=600, height=50, font=("Arial", 20))
         self.button1.grid(row=0, column=0, padx=20, pady=10, sticky="ew")
-
+    # Iniciar la actualización de la cámara en un hilo
+        self.recognition_thread = threading.Thread(target=self.run_recognition)
+        self.recognition_thread.daemon = True
+        self.recognition_thread.start()
     def encode_faces(self):
         for image in os.listdir('faces'):
             face_image = face_recognition.load_image_file(f'faces/{image}')
@@ -74,9 +77,17 @@ class FaceRecognition:
             if self.process_current_frame:
                 small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
                 rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+               
 
-                self.face_locations = face_recognition.face_locations(rgb_small_frame)
-                self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
+                # creamos un hilo
+                self.hilo_face_locations = threading.Thread(target=face_recognition.face_locations, args=(rgb_small_frame,))
+                self.hilo_face_locations.start()
+                self.hilo_face_encodings = threading.Thread(target=face_recognition.face_encodings, args=(rgb_small_frame, self.face_locations,))
+                self.hilo_face_encodings.start()
+                self.hilo_face_locations.join()
+                self.hilo_face_encodings.join()
+                # self.face_locations = face_recognition.face_locations(rgb_small_frame)
+                # self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
 
                 self.face_names = []
                 for face_encoding in self.face_encodings:
@@ -140,9 +151,10 @@ class FaceRecognition:
 if __name__ == '__main__':
     root = customtkinter.CTk()
     cap = cv2.VideoCapture(0)
+    # cap.set(3, 640)
+    # cap.set(4, 480)
+    # mejoramos el rendimiento
+    cap.set(cv2.CAP_PROP_FPS, 120)
     app = FaceRecognition(root, cap)
-    face_thread = threading.Thread(target=app.run_recognition)
-    face_thread.daemon = True
-    face_thread.start()
-
+  
     root.mainloop()
