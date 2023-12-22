@@ -125,8 +125,24 @@ class FaceRecognition:
                 rgb_small_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
 
                 # Encontrar todas las caras en el fotograma actual del video
-                self.face_locations = face_recognition.face_locations(rgb_small_frame)
                 self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
+                self.face_locations = face_recognition.face_locations(rgb_small_frame)
+                # self.face_locations = self.face_locations_thread
+                # self.face_locations = self.face_locations_thread
+                
+                # self.face_locations = threading.Thread(target=face_recognition.face_locations, args=(rgb_small_frame,))
+                # self.face_locations.start()
+                # self.face_locations.join()
+
+                # self.face_endonings = threading.Thread(target=face_recognition.face_encodings, args=(rgb_small_frame, self.face_locations))
+                # self.face_endonings.start()
+                # self.face_endonings.join()
+
+
+
+
+                # self.face_locations = face_recognition.face_locations(rgb_small_frame
+                # self.face_encodings = face_recognition.face_encodings(rgb_small_frame, self.face_locations)
 
                 self.face_names = []
                 for face_encoding in self.face_encodings:
@@ -205,6 +221,7 @@ class FaceRecognition:
 if __name__ == '__main__':
     root = customtkinter.CTk()
     cap = cv2.VideoCapture(0)
+    
     cap.set(3, 1150)
     cap.set(4, 800)
     cap.set(cv2.CAP_PROP_FPS, 60)
