@@ -59,7 +59,7 @@ pip install -r requirements.txt
 ```
 5. Ejecutar el archivo main.py con el siguiente comando:
 ```
-python main.py
+python app.py
 ```
 
 ## Observaciones:
