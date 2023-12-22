@@ -45,7 +45,7 @@ def face_confidence(face_distance, face_match_threshold=0.4):
 class FaceRecognition:
     """
     Class to recognize faces
-
+    
     """
     face_locations = []
     face_encodings = []
@@ -100,6 +100,7 @@ class FaceRecognition:
         """
         for image in os.listdir('faces'):
             face_image = face_recognition.load_image_file(f'faces/{image}')
+            # esto sirve para codificar la imagen y poder compararla con las demas, es importante ya que si no se hace esto no se podra comparar
             face_encoding = face_recognition.face_encodings(face_image)[0]
 
             self.known_face_encodings.append(face_encoding)
@@ -203,6 +204,7 @@ class FaceRecognition:
         cv2.destroyAllWindows()
 
 if __name__ == '__main__':
+    # main para iniciar la aplicación
     root = customtkinter.CTk()
     cap = cv2.VideoCapture(0)
     cap.set(3, 1150)
